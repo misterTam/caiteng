@@ -81,6 +81,7 @@
   <script src="https://cdn.staticfile.org/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="assets/pdf-viewer.js"></script>
   <script src="assets/app.js"></script>
+  <script src="assets/image-manual.js"></script>
   <script>
     (async function initPDF(){
       const { siteName, whatsAppLink } = await window.App.loadSiteConfig(window.__ROOT_PATH__).catch(()=>({ siteName:'电子说明书' }));
@@ -90,25 +91,29 @@
       const wa = document.getElementById('whatsappBtn');
       if(whatsAppLink) wa.href = whatsAppLink; else wa.style.display='none';
 
-      // Open modal ASAP; do not wait for PDF
+      // Open modal ASAP; do not wait for rendering
       const modalCtrl = window.App.initModal();
       window.App.initContactForm(window.__ROOT_PATH__);
       setTimeout(()=>{ modalCtrl.open?.(); }, 300);
 
       const mount = document.getElementById('manualContainer');
+
+      // 1) Prefer images manifest for maximum WeChat compatibility
+      const okImages = await window.renderImageManual('manual-images/manifest.json', mount);
+      if(okImages) return;
+
+      // 2) Fallback to PDF.js rendering
       const pdfName = 'manual.pdf';
-      window.renderPDF(`${pdfName}?_=${Date.now()}`, mount, { initialPages: 1, scaleMobile: 1.0, scaleDesktop: 1.1, lazy: true })
-        .then(ok => {
-          if(!ok){
-            const link = document.createElement('a');
-            link.className = 'btn btn-outline';
-            link.textContent = '点击打开 PDF';
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.href = pdfName;
-            mount.appendChild(document.createElement('div')).appendChild(link);
-          }
-        });
+      const okPdf = await window.renderPDF(`${pdfName}?_=${Date.now()}`, mount, { initialPages: 1, scaleMobile: 1.0, scaleDesktop: 1.1, lazy: true });
+      if(!okPdf){
+        const link = document.createElement('a');
+        link.className = 'btn btn-outline';
+        link.textContent = '点击打开 PDF';
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.href = pdfName;
+        mount.appendChild(document.createElement('div')).appendChild(link);
+      }
     })();
   </script>
 </body>
