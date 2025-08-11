@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>彩腾电子说明书</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <meta name="description" content="手机扫码直达产品电子说明书，支持线索收集与售后视频。" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <script>window.__ROOT_PATH__ = '.';</script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="brand" id="brandName">彩腾电子说明书</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>欢迎使用电子说明书</h1>
+      <p>客户扫码即可直达对应产品的安装与使用指南。以下列表仅用于测试与演示。</p>
+    </section>
+
+    <section class="product-list">
+      <div class="section-title">产品列表（演示）</div>
+      <input id="searchInput" class="search-input" placeholder="搜索产品名称或型号…" />
+      <div id="productGrid" class="grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> 彩腾</div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async function initIndex() {
+      const { siteName } = await window.App.loadSiteConfig(window.__ROOT_PATH__);
+      document.title = siteName;
+      document.getElementById('brandName').textContent = siteName;
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      const products = await window.App.loadProducts(window.__ROOT_PATH__);
+      const grid = document.getElementById('productGrid');
+      const searchInput = document.getElementById('searchInput');
+
+      function render(list) {
+        grid.innerHTML = '';
+        list.forEach(p => {
+          const card = document.createElement('a');
+          card.className = 'card';
+          card.href = `p/?id=${encodeURIComponent(p.id)}`;
+          card.innerHTML = `
+            <div class="card-image" style="background-image:url('${p.heroImage || ''}')"></div>
+            <div class="card-body">
+              <div class="card-title">${p.name}</div>
+              <div class="card-subtitle">型号：${p.sku || '-'}</div>
+              <div class="card-actions"><span class="btn btn-primary btn-sm">查看说明书</span></div>
+            </div>`;
+          grid.appendChild(card);
+        });
+      }
+
+      render(products);
+
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        const filtered = products.filter(p => `${p.name} ${p.sku}`.toLowerCase().includes(q));
+        render(filtered);
+      });
+    })();
+  </script>
+</body>
+</html> 

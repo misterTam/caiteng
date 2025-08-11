@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>产品说明书</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <meta name="description" content="产品电子说明书与安装指导" />
+  <meta name="theme-color" content="#0ea5e9" />
+  <script>window.__ROOT_PATH__ = '..';</script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" id="brandName" href="../">彩腾电子说明书</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="product-hero">
+      <h1 id="productTitle">正在加载…</h1>
+      <div id="productSku" class="muted"></div>
+      <div id="heroImage" class="hero-image"></div>
+      <div class="cta-row">
+        <button class="btn btn-primary" data-open-contact>获取在线安装指导</button>
+        <a class="btn btn-outline" id="whatsappBtn" target="_blank" rel="noopener">WhatsApp 技术支持</a>
+      </div>
+    </section>
+
+    <section class="manual">
+      <div class="section-title">说明书</div>
+      <article id="manualContainer" class="prose">正在加载说明书…</article>
+    </section>
+
+    <section class="after-sales">
+      <div class="section-title">售后视频</div>
+      <div id="videoContainer" class="video-container muted">暂无视频</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> 彩腾</div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="contactModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog" role="document">
+      <div class="modal-header">
+        <div class="modal-title">获取在线安装指导</div>
+        <button class="icon-btn" data-close-modal aria-label="关闭">×</button>
+      </div>
+      <form id="contactForm" class="modal-body">
+        <input type="hidden" name="productId" id="productIdInput" />
+        <div class="form-row">
+          <label>姓名</label>
+          <input name="name" placeholder="请输入姓名" required />
+        </div>
+        <div class="form-row">
+          <label>电话</label>
+          <input name="phone" placeholder="请输入电话号码" inputmode="tel" />
+        </div>
+        <div class="form-row">
+          <label>邮箱</label>
+          <input name="email" placeholder="请输入邮箱" inputmode="email" />
+        </div>
+        <div class="form-row">
+          <label>社交平台</label>
+          <input name="socialPlatform" placeholder="如 WhatsApp / 微信 / Telegram" />
+        </div>
+        <div class="form-row">
+          <label>账号</label>
+          <input name="socialAccount" placeholder="请输入社交平台账号" />
+        </div>
+        <div class="form-row">
+          <label>留言（可选）</label>
+          <textarea name="message" rows="3" placeholder="请简要描述您的问题或安装需求"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-close-modal>取消</button>
+          <button class="btn btn-primary" type="submit">提交</button>
+        </div>
+        <div class="form-hint">提交后，我们将在 24 小时内联系您；也可通过上方按钮添加 WhatsApp 获得及时技术支持。</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="../assets/app.js"></script>
+  <script src="../assets/product.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html> 

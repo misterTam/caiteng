@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ct-100",
+    "name": "彩腾智能门锁 CT-100",
+    "sku": "CT-100",
+    "heroImage": "https://via.placeholder.com/1200x600/0ea5e9/ffffff?text=CT-100",
+    "videoUrl": "",
+    "pdfUrl": ""
+  },
+  {
+    "id": "ct-200",
+    "name": "彩腾智能门锁 CT-200",
+    "sku": "CT-200",
+    "heroImage": "https://via.placeholder.com/1200x600/0ea5e9/ffffff?text=CT-200",
+    "videoUrl": "",
+    "pdfUrl": ""
+  }
+] 

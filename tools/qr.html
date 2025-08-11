@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>二维码生成器 - 彩腾电子说明书</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    .controls{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+    .qr-grid{display:grid;grid-template-columns:1fr;gap:18px}
+    @media(min-width:640px){.qr-grid{grid-template-columns:1fr 1fr}}
+    .qr-card{border:1px solid var(--border);border-radius:12px;padding:12px}
+    .qr-url{word-break:break-all;color:var(--muted);font-size:12px;margin-top:6px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>二维码生成器</h1>
+    <p class="small">从 `data/products.json` 读取产品列表，为每个产品生成直达说明书的二维码。可选强制弹窗引导（lead=1）。</p>
+
+    <div class="controls">
+      <div class="row">
+        <label>GitHub Pages 站点根地址</label>
+        <input id="baseUrl" class="search-input" placeholder="https://<用户名>.github.io/<仓库名>" />
+      </div>
+      <div class="row">
+        <label class="row" style="gap:6px;align-items:center">
+          <input type="checkbox" id="leadFlag" /> 打开即弹出线索窗口（lead=1）
+        </label>
+        <button id="genBtn" class="btn btn-primary">生成二维码</button>
+      </div>
+    </div>
+
+    <div id="list" class="qr-grid"></div>
+  </main>
+
+  <script>
+    function getDefaultBase(){
+      const origin = location.origin;
+      const path = location.pathname.replace(/\/tools\/[^/]*$/, '');
+      return origin + path;
+    }
+
+    async function loadProducts(){
+      const res = await fetch('../data/products.json?_=' + Date.now());
+      if(!res.ok) throw new Error('无法加载产品列表');
+      return await res.json();
+    }
+
+    function productUrl(base, id, lead){
+      const u = new URL(base.replace(/\/$/, '') + '/p/');
+      u.searchParams.set('id', id);
+      if(lead) u.searchParams.set('lead', '1');
+      return u.toString();
+    }
+
+    function render(products){
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'qr-card';
+        card.innerHTML = `
+          <div class="card-title">${p.name} <span class="small">(${p.id})</span></div>
+          <canvas style="width:260px;height:260px"></canvas>
+          <div class="qr-url"></div>
+          <div class="row">
+            <a class="btn btn-outline btn-sm" target="_blank">在新窗口打开</a>
+            <button class="btn btn-primary btn-sm">下载 PNG</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    async function main(){
+      document.getElementById('baseUrl').value = getDefaultBase();
+      const products = await loadProducts();
+      render(products);
+
+      document.getElementById('genBtn').addEventListener('click', async () => {
+        const base = document.getElementById('baseUrl').value.trim();
+        const lead = document.getElementById('leadFlag').checked;
+        const cards = Array.from(document.querySelectorAll('.qr-card'));
+
+        for(let i=0;i<products.length;i++){
+          const p = products[i];
+          const card = cards[i];
+          const url = productUrl(base, p.id, lead);
+          const canvas = card.querySelector('canvas');
+          const urlEl = card.querySelector('.qr-url');
+          const openA = card.querySelector('a');
+          const dlBtn = card.querySelector('button');
+
+          urlEl.textContent = url;
+          openA.href = url;
+
+          await QRCode.toCanvas(canvas, url, { width: 520, margin: 1 });
+          dlBtn.onclick = () => {
+            const tmp = document.createElement('a');
+            tmp.download = `${p.id}.png`;
+            tmp.href = canvas.toDataURL('image/png');
+            tmp.click();
+          };
+        }
+      });
+    }
+
+    main().catch(err => alert(err.message));
+  </script>
+</body>
+</html> 
