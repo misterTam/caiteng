@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>电子说明书</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdn.staticfile.org" crossorigin>
   <link rel="stylesheet" href="assets/styles.css" />
   <meta name="description" content="电子说明书 PDF 在线查看与安装指导联系收集。" />
   <meta name="theme-color" content="#0ea5e9" />
@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://cdn.staticfile.org/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="assets/pdf-viewer.js"></script>
   <script src="assets/app.js"></script>
   <script>
@@ -90,15 +90,24 @@
       const wa = document.getElementById('whatsappBtn');
       if(whatsAppLink) wa.href = whatsAppLink; else wa.style.display='none';
 
-      // Render local PDF named 说明书.pdf at project root using PDF.js
       const mount = document.getElementById('manualContainer');
-      await window.renderPDF('说明书pdf', mount);
 
-      // Modal and form
+      // Directly render manual.pdf (with cache-busting); fallback to open link
+      const pdfName = 'manual';
+      const ok = await window.renderPDF(`${pdfName}?_=${Date.now()}`, mount, { initialPages: 1, scaleMobile: 1.0, scaleDesktop: 1.1, lazy: true });
+      if(!ok){
+        const link = document.createElement('a');
+        link.className = 'btn btn-outline';
+        link.textContent = '点击打开 PDF';
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.href = pdfName;
+        mount.appendChild(document.createElement('div')).appendChild(link);
+      }
+
+      // Always open modal for lead capture
       const modalCtrl = window.App.initModal();
       window.App.initContactForm(window.__ROOT_PATH__);
-
-      // Always open on each visit
       setTimeout(()=>{ modalCtrl.open?.(); }, 600);
     })();
   </script>
