@@ -5,7 +5,7 @@
     "sku": "CT-100",
     "heroImage": "https://via.placeholder.com/1200x600/0ea5e9/ffffff?text=CT-100",
     "videoUrl": "",
-    "pdfUrl": ""
+    "pdfUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
   },
   {
     "id": "ct-200",
@@ -13,6 +13,6 @@
     "sku": "CT-200",
     "heroImage": "https://via.placeholder.com/1200x600/0ea5e9/ffffff?text=CT-200",
     "videoUrl": "",
-    "pdfUrl": ""
+    "pdfUrl": "https://www.orimi.com/pdf-test.pdf"
   }
 ] 

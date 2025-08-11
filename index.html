@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>彩腾电子说明书</title>
+  <title>电子说明书</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="assets/styles.css" />
-  <meta name="description" content="手机扫码直达产品电子说明书，支持线索收集与售后视频。" />
+  <meta name="description" content="电子说明书 PDF 在线查看与安装指导联系收集。" />
   <meta name="theme-color" content="#0ea5e9" />
   <script>window.__ROOT_PATH__ = '.';</script>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <div class="brand" id="brandName">彩腾电子说明书</div>
+      <div class="brand" id="brandName">电子说明书</div>
     </div>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <h1>欢迎使用电子说明书</h1>
-      <p>客户扫码即可直达对应产品的安装与使用指南。以下列表仅用于测试与演示。</p>
+    <section class="product-hero">
+      <div class="cta-row">
+        <button class="btn btn-primary" data-open-contact>获取在线安装指导</button>
+        <a class="btn btn-outline" id="whatsappBtn" target="_blank" rel="noopener">WhatsApp 技术支持</a>
+      </div>
     </section>
 
-    <section class="product-list">
-      <div class="section-title">产品列表（演示）</div>
-      <input id="searchInput" class="search-input" placeholder="搜索产品名称或型号…" />
-      <div id="productGrid" class="grid"></div>
+    <section class="manual">
+      <div id="manualContainer" class="prose"></div>
     </section>
   </main>
 
@@ -36,42 +36,70 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <div id="contactModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog" role="document">
+      <div class="modal-header">
+        <div class="modal-title">获取在线安装指导</div>
+        <button class="icon-btn" data-close-modal aria-label="关闭">×</button>
+      </div>
+      <form id="contactForm" class="modal-body">
+        <input type="hidden" name="productId" value="root" />
+        <div class="form-row">
+          <label>姓名</label>
+          <input name="name" placeholder="请输入姓名" required />
+        </div>
+        <div class="form-row">
+          <label>电话</label>
+          <input name="phone" placeholder="请输入电话号码" inputmode="tel" />
+        </div>
+        <div class="form-row">
+          <label>邮箱</label>
+          <input name="email" placeholder="请输入邮箱" inputmode="email" />
+        </div>
+        <div class="form-row">
+          <label>社交平台</label>
+          <input name="socialPlatform" placeholder="如 WhatsApp / 微信 / Telegram" />
+        </div>
+        <div class="form-row">
+          <label>账号</label>
+          <input name="socialAccount" placeholder="请输入社交平台账号" />
+        </div>
+        <div class="form-row">
+          <label>留言（可选）</label>
+          <textarea name="message" rows="3" placeholder="请简要描述您的问题或安装需求"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-close-modal>取消</button>
+          <button class="btn btn-primary" type="submit">提交</button>
+        </div>
+        <div class="form-hint">提交后，我们将在 24 小时内联系您；也可通过上方按钮添加 WhatsApp 获得及时技术支持。</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="assets/pdf-viewer.js"></script>
   <script src="assets/app.js"></script>
   <script>
-    (async function initIndex() {
-      const { siteName } = await window.App.loadSiteConfig(window.__ROOT_PATH__);
+    (async function initPDF(){
+      const { siteName, whatsAppLink } = await window.App.loadSiteConfig(window.__ROOT_PATH__).catch(()=>({ siteName:'电子说明书' }));
       document.title = siteName;
       document.getElementById('brandName').textContent = siteName;
       document.getElementById('year').textContent = new Date().getFullYear();
+      const wa = document.getElementById('whatsappBtn');
+      if(whatsAppLink) wa.href = whatsAppLink; else wa.style.display='none';
 
-      const products = await window.App.loadProducts(window.__ROOT_PATH__);
-      const grid = document.getElementById('productGrid');
-      const searchInput = document.getElementById('searchInput');
+      // Render local PDF named 说明书.pdf at project root using PDF.js
+      const mount = document.getElementById('manualContainer');
+      await window.renderPDF('说明书pdf', mount);
 
-      function render(list) {
-        grid.innerHTML = '';
-        list.forEach(p => {
-          const card = document.createElement('a');
-          card.className = 'card';
-          card.href = `p/?id=${encodeURIComponent(p.id)}`;
-          card.innerHTML = `
-            <div class="card-image" style="background-image:url('${p.heroImage || ''}')"></div>
-            <div class="card-body">
-              <div class="card-title">${p.name}</div>
-              <div class="card-subtitle">型号：${p.sku || '-'}</div>
-              <div class="card-actions"><span class="btn btn-primary btn-sm">查看说明书</span></div>
-            </div>`;
-          grid.appendChild(card);
-        });
-      }
+      // Modal and form
+      const modalCtrl = window.App.initModal();
+      window.App.initContactForm(window.__ROOT_PATH__);
 
-      render(products);
-
-      searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim().toLowerCase();
-        const filtered = products.filter(p => `${p.name} ${p.sku}`.toLowerCase().includes(q));
-        render(filtered);
-      });
+      // Always open on each visit
+      setTimeout(()=>{ modalCtrl.open?.(); }, 600);
     })();
   </script>
 </body>

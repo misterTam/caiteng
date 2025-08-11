@@ -63,18 +63,30 @@
     heroEl.style.backgroundImage = product.heroImage ? `url('${product.heroImage}')` : '';
     if(formProductId) formProductId.value = product.id;
 
-    try{
-      const res = await fetch(`${root}/manuals/${encodeURIComponent(product.id)}.md?_=${Date.now()}`);
-      if(res.ok){
-        const md = await res.text();
-        manualEl.innerHTML = window.marked.parse(md);
-      }else{
-        manualEl.innerHTML = '该产品的说明书暂未上线，请稍后再试或联系技术支持。';
-      }
-    }catch(err){
-      manualEl.innerHTML = '说明书加载失败，请检查网络后重试。';
+    // Render PDF manual
+    manualEl.innerHTML = '';
+    const pdfUrl = (product.pdfUrl || '').trim();
+    if(pdfUrl){
+      const container = document.createElement('div');
+      container.className = 'pdf-container';
+      const frame = document.createElement('iframe');
+      frame.src = pdfUrl;
+      frame.title = `${product.name} 说明书 (PDF)`;
+      frame.loading = 'lazy';
+      frame.setAttribute('aria-label', 'PDF 说明书');
+      frame.style.border = '0';
+      container.appendChild(frame);
+      manualEl.appendChild(container);
+
+      const actions = document.createElement('div');
+      actions.className = 'pdf-actions';
+      actions.innerHTML = `<a class="btn btn-outline btn-sm" target="_blank" rel="noopener" href="${pdfUrl}">在新窗口打开 PDF</a>`;
+      manualEl.appendChild(actions);
+    }else{
+      manualEl.textContent = '未配置该产品的 PDF 说明书，请联系技术支持。';
     }
 
+    // Render video
     videoEl.innerHTML = '';
     const url = (product.videoUrl||'').trim();
     if(url){
@@ -102,14 +114,7 @@
     }
 
     // Auto open contact modal once per session for this product
-    const sessionKey = `leadPromptShown:${product.id}`;
-    const shouldForceOpen = params.get('lead') === '1';
-    if(shouldForceOpen || !sessionStorage.getItem(sessionKey)){
-      setTimeout(()=>{
-        modalCtrl.open?.();
-        sessionStorage.setItem(sessionKey, '1');
-      }, 800);
-    }
+    setTimeout(()=>{ modalCtrl.open?.(); }, 800);
   }catch(err){
     console.error(err);
     titleEl.textContent = '加载失败';
