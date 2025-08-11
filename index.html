@@ -90,25 +90,25 @@
       const wa = document.getElementById('whatsappBtn');
       if(whatsAppLink) wa.href = whatsAppLink; else wa.style.display='none';
 
-      const mount = document.getElementById('manualContainer');
-
-      // Directly render manual.pdf (with cache-busting); fallback to open link
-      const pdfName = 'manual';
-      const ok = await window.renderPDF(`${pdfName}?_=${Date.now()}`, mount, { initialPages: 1, scaleMobile: 1.0, scaleDesktop: 1.1, lazy: true });
-      if(!ok){
-        const link = document.createElement('a');
-        link.className = 'btn btn-outline';
-        link.textContent = '点击打开 PDF';
-        link.target = '_blank';
-        link.rel = 'noopener';
-        link.href = pdfName;
-        mount.appendChild(document.createElement('div')).appendChild(link);
-      }
-
-      // Always open modal for lead capture
+      // Open modal ASAP; do not wait for PDF
       const modalCtrl = window.App.initModal();
       window.App.initContactForm(window.__ROOT_PATH__);
-      setTimeout(()=>{ modalCtrl.open?.(); }, 600);
+      setTimeout(()=>{ modalCtrl.open?.(); }, 300);
+
+      const mount = document.getElementById('manualContainer');
+      const pdfName = 'manual.pdf';
+      window.renderPDF(`${pdfName}?_=${Date.now()}`, mount, { initialPages: 1, scaleMobile: 1.0, scaleDesktop: 1.1, lazy: true })
+        .then(ok => {
+          if(!ok){
+            const link = document.createElement('a');
+            link.className = 'btn btn-outline';
+            link.textContent = '点击打开 PDF';
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.href = pdfName;
+            mount.appendChild(document.createElement('div')).appendChild(link);
+          }
+        });
     })();
   </script>
 </body>

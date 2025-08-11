@@ -1,8 +1,14 @@
 (function(){
   const PDFJS_VERSION = '3.11.174';
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  const isWeChat = /MicroMessenger/i.test(navigator.userAgent || '');
   if(pdfjsLib){
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.staticfile.org/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+    if(isWeChat){
+      // Avoid cross-origin worker issues inside WeChat WebView
+      pdfjsLib.GlobalWorkerOptions.workerSrc = undefined;
+      pdfjsLib.disableWorker = true;
+    }
   }
 
   function isMobile(){ return (window.matchMedia && matchMedia('(max-width: 768px)').matches) || (window.innerWidth <= 768); }
@@ -48,10 +54,8 @@
       const pdf = await loadingTask.promise;
       const scale = isMobile() ? scaleMobile : scaleDesktop;
 
-      // Remove hint after we start rendering
       hint.remove();
 
-      // Render first N pages quickly
       const firstCount = Math.min(initialPages, pdf.numPages);
       for(let p = 1; p <= firstCount; p++){
         // eslint-disable-next-line no-await-in-loop
@@ -66,7 +70,6 @@
         return true;
       }
 
-      // Lazy render remaining pages when scrolled into view
       const io = ('IntersectionObserver' in window) ? new IntersectionObserver(async (entries) => {
         for(const entry of entries){
           if(entry.isIntersecting){
@@ -96,7 +99,6 @@
         ph.textContent = `加载第 ${p} 页…`;
         container.appendChild(ph);
         if(io){ io.observe(ph); } else {
-          // Fallback: idle rendering
           setTimeout(async ()=>{
             if(ph.isConnected){
               const parent = ph.parentElement; ph.remove();
